@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head>
 	    <meta charset="utf-8">
-    <title>品牌列表</title>
+    <title>分类列表</title>
 
     <meta name="description" content="Dashboard">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,9 +36,9 @@
                 <div class="page-breadcrumbs">
                     <ul class="breadcrumb">
                                         <li>
-                        <a href="#">系统</a>
+                        <a href="#">文章模块</a>
                     </li>
-                                        <li class="active">用户管理</li>
+                                        <li class="active">文章分类</li>
                                         </ul>
                 </div>
                 <!-- /Page Breadcrumb -->
@@ -46,7 +46,7 @@
                 <!-- Page Body -->
                 <div class="page-body">
                     
-<button type="button" tooltip="添加品牌" class="btn btn-sm btn-azure btn-addon" onClick="javascript:window.location.href = '{:url('Brand/add')}'"> <i class="fa fa-plus"></i> Add
+<button type="button" tooltip="添加分类" class="btn btn-sm btn-azure btn-addon" onClick="javascript:window.location.href = '{:url('Cate/add')}'"> <i class="fa fa-plus"></i> Add
 </button>
 <div class="row">
     <div class="col-lg-12 col-sm-12 col-xs-12">
@@ -57,11 +57,10 @@
                         <thead class="">
                             <tr>
                                 <th class="text-center">ID</th>
-                                <th class="text-center">品牌名称</th>
-                                <th class="text-center">品牌地址</th>
-                                <th class="text-center">品牌logo</th>
-                                <th class="text-center">品牌描述</th>
-                                <th class="text-center">品牌状态</th>
+                                <th class="text-center">排序</th>
+                                <th class="text-center">分类名称</th>
+                                <th class="text-center">类型</th>
+                                <th class="text-center">显示到导航栏</th>
                                 <th class="text-center">操作</th>
                             </tr>
                         </thead>
@@ -69,46 +68,57 @@
                             {volist name="data" id='vo'}
                                 <tr>
                                     <td align="center">{$vo.id}</td>
-                                    <td align="center">{$vo.name}</td>
-                                    <td align="center"><a target="_blank" href="{$vo.url}">{$vo.url}</a></td>
                                     <td align="center">
-                                        {if condition="$vo['img'] neq '' "}
-                                        <img style="width: 35px; height: 35px;" src="/static/uploads/{$vo.img}">
-                                        {else /}
-                                        暂无品牌logo
-                                        {/if}
+                                        <input class="changeSort" attrid="{$vo.id}" type="text" style="width: 50px;text-align: center;" value="{$vo.sort}">
                                     </td>
-                                    <td align="center">
+                                    <td align="left">
                                         <?php
-                                            if(mb_strlen($vo['desc'])>20){
-                                                echo mb_substr($vo['desc'],0,20,'utf-8').'......';
-                                            }else{
-                                                echo $vo['desc'];
-                                            }
+                                            echo str_repeat('-',$vo['level']*8).$vo['name'];
                                         ?>
                                     </td>
                                     <td align="center">
-                                        {if condition="$vo['status'] eq 1 "}
+                                        <?php
+                                            if($vo['type']==1){
+                                                echo '系统分类';
+                                            }elseif($vo['type']==2){
+                                                echo '帮助分类';
+                                            }elseif($vo['type']==3){
+                                                echo '网店帮助';
+                                            }elseif($vo['type']==4){
+                                                echo '网店信息';
+                                            }elseif($vo['type']==5){
+                                                echo '普通分类';
+                                            }
+
+                                        ?>
+                                    </td>
+                                    <td align="center">
+                                        {if condition="$vo['show_nav'] eq 1"}
                                             <div class="changestatus" attrid="{$vo.id}" ><img style="width: 30px;height: 30px;" src="/static/shop/true.png"></div>
                                         {else /}
                                             <div class="changestatus" attrid="{$vo.id}" ><img style="width: 30px;height: 30px;" src="/static/shop/wrong.png"></div>
                                         {/if}
                                     </td>
+
                                     <td align="center">
-                                        <a href="{:url('Brand/edit',['id'=>$vo['id']])}" class="btn btn-primary btn-sm shiny">
+                                        <a href="{:url('Cate/edit',['id'=>$vo['id']])}" class="btn btn-primary btn-sm shiny">
                                             <i class="fa fa-edit"></i> 编辑
                                         </a>
-                                        <a href="{:url('Brand/del',['id'=>$vo['id']])}" onClick="warning('确实要删除吗', '')" class="btn btn-danger btn-sm shiny">
-                                            <i class="fa fa-trash-o"></i> 删除
-                                        </a>
+
+                                        {notin name="$vo['id']" value='1,2,3'}
+                                            <a href="{:url('Cate/del',['id'=>$vo['id']])}" onClick="warning('确实要删除吗', '')" class="btn btn-danger btn-sm shiny">
+                                                <i class="fa fa-trash-o"></i> 删除
+                                            </a>
+                                        {else /}
+                                            <a href="{:url('Cate/del',['id'=>$vo['id']])}" disabled="disabled" class="btn btn-danger btn-sm shiny">
+                                                <i class="fa fa-trash-o"></i> 删除
+                                            </a>
+                                        {/notin}
                                     </td>
                                 </tr>
                             {/volist}
                         </tbody>
                     </table>
-                    <div style="display: flex;justify-content: flex-end;margin-right: 3px;">
-                        {$data->render()}
-                    </div>
                 </div>
                 <div>
                 	                </div>
@@ -127,16 +137,15 @@
 	    <!--Basic Scripts-->
     <script src="__ADMIN__/style/jquery_002.js"></script>
     <script src="__ADMIN__/style/bootstrap.js"></script>
-
     <!--Beyond Scripts-->
     <script src="__ADMIN__/style/beyond.js"></script>
 
     <script>
         $('.changestatus').click(function () {
             let id=$(this).attr('attrid');
+            let tablename='cate';
+            let flied='show_nav';
             let url="{:url('Common/ajaxChangeStatus')}";
-            let flied='status';
-            let tablename='brand';
             $.post(url,{id,tablename,flied},(res)=>{
                 if(res.status==1){
                     layer.alert(res.msg, {icon: 6});
@@ -151,9 +160,27 @@
             },'json');
         });
 
+        $('.changeSort').blur(function () {
+            let id=$(this).attr('attrid');
+            let sort=$(this).val();
+            let tablename='cate';
+            let url="{:url('Common/ajaxChangeSort')}";
+            $.post(url,{id,sort,tablename},(res)=>{
+                if(res.status==1){
+                    layer.alert(res.msg, {icon: 6});
+                    location.reload();
+                }else {
+                    layer.alert(res.msg, {icon: 5});
+                }
+            },'json');
+        });
+
+
+
 
 
     </script>
+    
 
 
 </body></html>

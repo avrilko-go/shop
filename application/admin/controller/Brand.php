@@ -100,4 +100,6 @@ class Brand extends Controller
             }
         }
     }
+
+
 }
